@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<h2 data-translate="idioma">Language:</h2>
+    <select id="languageSwitcher">
+        <option value="pt">Português</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+    </select>
+<script src="script.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-translate="title3">NASA NEO's Viewer</title>
+<button data-translate="butao3" onclick="location.href='Nasa space.html'"style="background-color:#ffcc00;color:#0d1b2a;width: 200px;height:100px;">Meteor Defense Simulator</button>
+<button data-translate="button5" onclick="location.href='Index.html'"style="background-color:#ffcc00;color:#0d1b2a;width: 200px;height:100px;">Back</button>
+<style>
+  body { opacity: 0;
+    transition: opacity 0.5s ease; font-family: Arial, sans-serif; background: #0d1b2a; color: #e0e0e0; padding: 20px; }
+  h1 { text-align: center; color: #ffcc00; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #555; padding: 8px; text-align: center; }
+  th { background-color: #1b263b; }
+  tr:nth-child(even) { background-color: #1b263b; }
+  tr:nth-child(odd) { background-color: #162447; }
+  .hazardous { color: #ff4d4d; font-weight: bold; }
+</style>
+</head>
+<body>
+
+
+<h1 data-translate="dias7">Near-Earth Objects (Next 7 Days)</h1>
+<table>
+  <thead>
+    <tr>
+      <th data-translate="Nome">Name</th>
+      <th data-translate="Diametro">Diameter (m)</th>
+      <th data-translate="Velocidade">Velocity (m/s)</th>
+      <th data-translate="DistanciaDeErro">Miss Distance (km)</th>
+      <th data-translate="Perigo">Hazardous</th>
+      <th data-translate="Dia">Close Approach Date</th>
+    </tr>
+  </thead>
+  <tbody id="neo-table">
+    <tr><td colspan="6" data-translate="loading">Loading...</td></tr>
+  </tbody>
+</table>
+
+
+<script>
+const API_KEY = "TP9zlVOdz0TTAjhk8VhArDL6wOcCoIZbIPOYtNds";
+
+
+async function fetchNEOs() {
+  const today = new Date();
+  const startDate = today.toISOString().split('T')[0];
+
+
+  const endDate = new Date();
+  endDate.setDate(today.getDate() + 6); // next 7 days
+  const endDateStr = endDate.toISOString().split('T')[0];
+
+
+  const url = `https://api.nasa.gov/neo/rest/v1/feed?start_date=${startDate}&end_date=${endDateStr}&api_key=${API_KEY}`;
+
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(response.statusText);
+    const data = await response.json();
+    displayNEOs(data.near_earth_objects);
+  } catch (error) {
+    document.getElementById("neo-table").innerHTML = `<tr><td colspan="6">Error: ${error}</td></tr>`;
+    console.error(error);
+  }
+}
+
+
+function displayNEOs(neoData) {
+  const tbody = document.getElementById("neo-table");
+  tbody.innerHTML = ""; // clear table
+
+
+  for (const date in neoData) {
+    neoData[date].forEach(neo => {
+      const diameter = (neo.estimated_diameter.kilometers.estimated_diameter_max * 1000).toFixed(2); // meters
+      const approach = neo.close_approach_data[0];
+      const velocity = (parseFloat(approach.relative_velocity.kilometers_per_hour) / 3.6).toFixed(2); // m/s
+      const miss = parseFloat(approach.miss_distance.kilometers).toFixed(2);
+      const hazardous = neo.is_potentially_hazardous_asteroid ? "YES" : "NO";
+
+
+      const row = document.createElement("tr");
+      if (neo.is_potentially_hazardous_asteroid) row.classList.add("hazardous");
+      row.innerHTML = `
+        <td>${neo.name}</td>
+        <td>${diameter}</td>
+        <td>${velocity}</td>
+        <td>${miss}</td>
+        <td>${hazardous}</td>
+        <td>${approach.close_approach_date}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+}
+window.addEventListener("load", () => {
+    document.body.style.opacity = 1; // animação de aparecer
+});
+// Load NEOs on page load
+fetchNEOs();
+</script>
+
+
+</body>
+</html>

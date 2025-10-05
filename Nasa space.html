@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="script.js" defer></script>
+  <title data-translate="title1">Meteor Defense Simulator</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    body { margin:0; font-family:Arial, sans-serif; display:flex; height:100vh; background:#0d1b2a; color:white; }
+    #sidebar { width:350px; background:#162447; padding:15px; overflow:auto; }
+    #map { flex:1; }
+    h2 { color:#ffcc00; text-align:center; }
+    .slider-group { margin:15px 0; }
+    label { display:block; margin-bottom:5px; }
+    input[type=range] { width:100%; }
+    select { width:100%; padding:8px; margin:10px 0; }
+    #info { margin-top:20px; }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <h2 data-translate="title2">Meteor Defense Simulator</h2>
+    <p data-translate="Clica">Click on the map to launch the meteor.</p>
+
+    <div class="slider-group">
+      <label for="vel" data-translate="Vel">Velocity (m/s): <span id="velVal">20000</span></label>
+      <input type="range" id="vel" min="100" max="50000" value="20000">
+    </div>
+    <div class="slider-group">
+      <label for="diam" data-translate="diam">Diameter (m): <span id="diamVal">1000</span></label>
+      <input type="range" id="diam" min="1" max="20000" value="1000">
+    </div>
+    <div class="slider-group">
+      <label for="dens" data-translate="dens">Density (kg/m³): <span id="densVal">3000</span></label>
+      <input type="range" id="dens" min="500" max="8000" value="3000">
+    </div>
+<h2 data-translate="idioma">Language:</h2>
+    <select id="languageSwitcher">
+        <option value="pt">Português</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+    </select>
+    <label for="defense" data-translate="DefenseMode">Defense Method:</label>
+    <select id="defense">
+      <option value="none" data-translate="nada">None (Direct Impact)</option>
+      <option value="nuclear" data-translate="bombaatomica">Nuclear Explosion</option>
+      <option value="kinetic" data-translate="kinetic">Kinetic Impactor</option>
+      <option value="tractor" data-translate="trator">Gravity Tractor</option>
+      <option value="laser" data-translate="laser">Space Laser</option>
+      <option value="drill" data-translate="bombadesatomica">Drilling Explosion</option>
+      <option value="atmosphere" data-translate="atmosfera">Atmospheric Defense</option>
+    </select>
+    <button onclick="location.href='NEO.html'"style="background-color:#ffcc00;color:#0d1b2a;width: 200px;height:100px;" data-translate="button1">NEO's database</button>
+    <button onclick="location.href='Index.html'"style="background-color:#ffcc00;color:#0d1b2a;width: 200px;height:100px;" data-translate="button5">Back</button>
+    <div id="info"></div>   
+  </div>
+
+  <!-- Map -->
+  <div id="map"></div>
+
+  <script>
+    // Initialize map
+    const map = L.map('map').setView([0,0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let currentCircle = null;
+    let vel = 20000, diam = 1000, dens = 3000;
+
+    // Sliders
+    document.getElementById("vel").addEventListener("input", e=>{
+      vel = +e.target.value; document.getElementById("velVal").textContent = vel;
+    });
+    document.getElementById("diam").addEventListener("input", e=>{
+      diam = +e.target.value; document.getElementById("diamVal").textContent = diam;
+    });
+    document.getElementById("dens").addEventListener("input", e=>{
+      dens = +e.target.value; document.getElementById("densVal").textContent = dens;
+    });
+
+    // Map click = meteor launch
+    map.on("click", function(e){
+      const mode = document.getElementById("defense").value;
+      document.getElementById("info").innerHTML = "";
+
+      if(mode === "none"){
+        // Physics
+        const volume = (4/3)*Math.PI*Math.pow(diam/2,3);
+        const mass = volume * dens;
+        const energy = 0.5 * mass * Math.pow(vel,2);
+        const energyMT = energy / (4.184e15);
+        const crater = 0.765 * Math.pow(energyMT, 1/3.4);
+        const magnitude = (Math.log10(energy*1e-4)-5.24)/1.44;
+
+        if(currentCircle){ map.removeLayer(currentCircle); currentCircle = null; }
+
+        currentCircle = L.circle(e.latlng, {
+          color:"orange", fillColor:"#f02", fillOpacity:0.5, radius:(crater/2)*1000
+        }).addTo(map);
+
+        document.getElementById("info").innerHTML =
+          `<b>Direct Impact!</b><br>Crater: ${crater.toFixed(2)} km<br>Magnitude: ${magnitude.toFixed(2)}`;
+      } else {
+        applyDefense(mode, e.latlng);
+      }
+    });
+
+    // Defense functions
+    function applyDefense(mode,pos){
+      switch(mode){
+        case "nuclear": nuclearExplosion(pos); break;
+        case "kinetic": kineticImpactor(pos); break;
+        case "tractor": gravityTractor(pos); break;
+        case "laser": spaceLaser(pos); break;
+        case "drill": drillingExplosion(pos); break;
+        case "atmosphere": atmosphericDefense(pos); break;
+      }
+    }
+
+    function removeCrater(){
+      if(currentCircle){ map.removeLayer(currentCircle); currentCircle = null; }
+    }
+
+    // --- Defenses ---
+    function nuclearExplosion(pos){
+      removeCrater();
+      const explosionRadiusMeters = 500000;
+      const explosionCircle = L.circle(pos, {
+        radius: explosionRadiusMeters,
+        color: "yellow",
+        fillColor: "orange",
+        fillOpacity: 0.6,
+        weight: 2
+      }).addTo(map);
+
+      document.getElementById("info").innerHTML="💥 Nuclear explosion: asteroid fragmented!";
+
+      let steps = 8;
+      let step = 0;
+      const expandInterval = setInterval(()=>{
+        step++;
+        explosionCircle.setRadius(explosionRadiusMeters * (1 + step*0.12));
+        if(step >= steps){
+          clearInterval(expandInterval);
+          setTimeout(()=> map.removeLayer(explosionCircle), 400);
+        }
+      }, 100);
+    }
+
+    function kineticImpactor(pos){
+      removeCrater();
+      const line = L.polyline([[pos.lat+20,pos.lng-40],pos],{color:"white"}).addTo(map);
+      document.getElementById("info").innerHTML="🚀 Kinetic impactor: asteroid deflected!";
+      setTimeout(()=> map.removeLayer(line),1500);
+    }
+
+    function gravityTractor(pos){
+      removeCrater();
+      const mark = L.circleMarker([pos.lat+5,pos.lng+5],{radius:6,color:"green"}).addTo(map);
+      document.getElementById("info").innerHTML="🛰️ Gravity tractor: slow orbital deflection.";
+      setTimeout(()=> map.removeLayer(mark),1500);
+    }
+
+    function spaceLaser(pos){
+      removeCrater();
+      const laserLine = L.polyline([[pos.lat+40,pos.lng+80],pos],{color:"red", weight:2}).addTo(map);
+      document.getElementById("info").innerHTML="🔫 Space laser: asteroid surface vaporized.";
+      setTimeout(()=> map.removeLayer(laserLine),1500);
+    }
+
+    function drillingExplosion(pos){
+      removeCrater();
+      const drill = L.circle(pos,{radius:300000,color:"orange",fillOpacity:0.6}).addTo(map);
+      document.getElementById("info").innerHTML="💣 Drilling explosion: asteroid blown from inside.";
+      setTimeout(()=> map.removeLayer(drill),1200);
+    }
+
+    function atmosphericDefense(pos){
+      removeCrater();
+      const fragments = [];
+      for(let i=0;i<15;i++){
+        let lat=pos.lat+(Math.random()*2-1);
+        let lng=pos.lng+(Math.random()*2-1);
+        fragments.push(L.circleMarker([lat,lng],{radius:3,color:"white"}).addTo(map));
+      }
+      document.getElementById("info").innerHTML="☄️ Atmospheric defense: asteroid fragmented in atmosphere.";
+      setTimeout(()=> fragments.forEach(f=> map.removeLayer(f)), 1500);
+      }
+  </script>
+</body>
+</html>
+
