@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-translate="title">Starting page</title>
+<script src="script.js" defer></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0d1b2a;
+    background-image: url(https://sdmntprcentralus.oaiusercontent.com/files/00000000-1d2c-61f5-9c51-7b22cc855b13/raw?se=2025-10-05T17%3A08%3A35Z&sp=r&sv=2024-08-04&sr=b&scid=cd62a2f6-0c9c-5ffc-ba1e-c0af1a6f30da&skoid=e9d2f8b1-028a-4cff-8eb1-d0e66fbefcca&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-05T12%3A57%3A12Z&ske=2025-10-06T12%3A57%3A12Z&sks=b&skv=2024-08-04&sig=E1dMcM5%2BPQoYzrtEDWjpZcpje/R3oXweocON8XIbKZQ%3D);
+    background-size: cover;             
+    background-position: center;       
+    background-repeat: no-repeat;       
+    color: #e0e0e0;
+    padding: 20px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  h1 { 
+    text-align: center; 
+    color: #ffcc00; 
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: center; /* centraliza horizontalmente */
+    gap: 20px; /* espaço entre os botões */
+    margin-top: 20px; /* distância do topo */
+  }
+
+  button {
+    padding: 12px 24px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    background-color: #ffcc00;
+    color: #0d1b2a;
+    cursor: pointer;
+  }
+
+  table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 20px; 
+  }
+
+  th, td { 
+    border: 1px solid #555; 
+    padding: 8px; 
+    text-align: center; 
+  }
+
+  th { 
+    background-color: #1b263b; 
+  }
+
+  tr:nth-child(even) { 
+    background-color: #1b263b; 
+  }
+
+  tr:nth-child(odd) { 
+    background-color: #162447; 
+  }
+
+  .hazardous { 
+    color: #ff4d4d; 
+    font-weight: bold; 
+  }
+
+  select {
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>NeoTRACKER</h1>
+
+<div class="button-container">
+  <button onclick="location.href='Nasa space.html'" data-translate="button">Meteor Defense Simulator</button>
+  <button onclick="location.href='NEO.html'" data-translate="button1">NEO's database</button>
+</div>
+
+<h2 data-translate="idioma">Language:</h2>
+<select id="languageSwitcher">
+  <option value="pt">Português</option>
+  <option value="en">English</option>
+  <option value="es">Español</option>
+</select>
+
+</body>
+</html>
+
